@@ -10,6 +10,7 @@ Der API-Token bleibt ausschliesslich auf dem Server – er wird nie an den Brows
 - Datepicker mit Vor-/Zurück-Navigation
 - Automatische Aktualisierung in einstellbarem Intervall
 - Konfigurierbarer Anzeigezeitraum, Slot-Raster und Zeitzone
+- Anpassbares Farbschema (Farbwähler in den Einstellungen)
 - Optionaler Platz-Filter
 - Shortcode `[availio_dashboard]`
 

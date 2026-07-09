@@ -4,7 +4,7 @@ Tags: booking, tennis, reservations, availio, fairgate
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,7 @@ Der API-Token bleibt dabei ausschliesslich auf dem Server; er wird nie an den Br
 * Belegungsraster aller Plätze für den gewählten Tag (frei / belegt / laufend)
 * Datepicker mit Vor- und Zurück-Navigation
 * Automatische Aktualisierung in einstellbarem Intervall
+* Anpassbares Farbschema über Farbwähler in den Einstellungen
 * Konfigurierbarer Anzeigezeitraum, Slot-Raster und Zeitzone
 * Optionaler Platz-Filter (nur bestimmte Plätze anzeigen)
 * Einbindung per Shortcode `[availio_dashboard]`
@@ -71,10 +72,18 @@ Ja, über den Platz-Filter in den Einstellungen (kommagetrennte Platz-IDs).
 
 == Changelog ==
 
+= 1.1.0 =
+* Neu: Konfigurierbares Farbschema (Farbwähler in den Einstellungen).
+* Neu: Fertige Farb-Voreinstellungen (Blau, Grün, Ziegel, Grau, Dunkel) per Klick.
+* Neu: Zugangsdaten optional über wp-config.php-Konstanten.
+
 = 1.0.0 =
 * Erste öffentliche Version.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Farbschema jetzt in den Einstellungen anpassbar.
 
 = 1.0.0 =
 Erste öffentliche Version.

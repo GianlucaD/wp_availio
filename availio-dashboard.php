@@ -3,7 +3,7 @@
  * Plugin Name:       Availio Dashboard
  * Plugin URI:        https://github.com/GianlucaD/wp_availio
  * Description:       Zeigt Platz-Buchungen aus Availio (Fairgate Standard-API / FSA) als interaktives Dashboard mit Datepicker. Einbindung via Shortcode [availio_dashboard].
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            GianlucaD
  * Author URI:        https://github.com/GianlucaD
  * License:           GPL-2.0-or-later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AVAILIO_DASH_VERSION', '1.0.0');
+define('AVAILIO_DASH_VERSION', '1.1.0');
 define('AVAILIO_DASH_DIR',     plugin_dir_path(__FILE__));
 define('AVAILIO_DASH_URL',     plugin_dir_url(__FILE__));
 
@@ -121,6 +121,99 @@ add_action('admin_init', function (): void {
     ]);
 });
 
+// ── Color-Picker nur auf der Einstellungsseite laden ──────────────────────────
+add_action('admin_enqueue_scripts', function (string $hook): void {
+    if ($hook !== 'settings_page_availio-dashboard') {
+        return;
+    }
+    wp_enqueue_style('wp-color-picker');
+    wp_enqueue_script('wp-color-picker');
+
+    $presets = wp_json_encode(availio_dash_color_presets());
+    $js = 'window.availioPresets = ' . $presets . ';'
+        . 'jQuery(function($){'
+        . '  $(".availio-color-field").wpColorPicker();'
+        . '  $(".availio-preset").on("click", function(e){'
+        . '    e.preventDefault();'
+        . '    var p = window.availioPresets[$(this).data("preset")];'
+        . '    if(!p){return;}'
+        . '    $.each(p, function(key, hex){ $("#ad_"+key).wpColorPicker("color", hex); });'
+        . '  });'
+        . '});';
+    wp_add_inline_script('wp-color-picker', $js);
+});
+
+/**
+ * Konfigurierbare Farben: Schlüssel => [Label, Standardwert, CSS-Variable(n)].
+ * Wird für Defaults, Sanitizing, Einstellungsseite und Frontend-Ausgabe genutzt.
+ */
+function availio_dash_color_fields(): array
+{
+    return [
+        'col_page'        => ['label' => 'Seiten-Hintergrund',      'default' => '#f5f6f8', 'vars' => ['--ad-bg-page']],
+        'col_head_bg'     => ['label' => 'Kopfzeile – Hintergrund', 'default' => '#2b5c8a', 'vars' => ['--ad-bg-head']],
+        'col_head_text'   => ['label' => 'Kopfzeile – Text',        'default' => '#ffffff', 'vars' => ['--ad-color-head']],
+        'col_booked_bg'   => ['label' => 'Belegt – Hintergrund',    'default' => '#d6e4f0', 'vars' => ['--ad-bg-booked']],
+        'col_booked_text' => ['label' => 'Belegt – Text',           'default' => '#1c3d5a', 'vars' => ['--ad-color-booked']],
+        'col_live_bg'     => ['label' => 'Laufend – Hintergrund',   'default' => '#2b7bd6', 'vars' => ['--ad-bg-live']],
+        'col_live_text'   => ['label' => 'Laufend – Text',          'default' => '#ffffff', 'vars' => ['--ad-color-live']],
+        'col_accent'      => ['label' => 'Akzent / Jetzt-Linie',    'default' => '#c0392b', 'vars' => ['--ad-color-now', '--ad-line-now']],
+    ];
+}
+
+/**
+ * Fertige Farb-Voreinstellungen: Name => Farbwerte je Farbfeld.
+ */
+function availio_dash_color_presets(): array
+{
+    return [
+        'Blau' => [
+            'col_page' => '#f5f6f8', 'col_head_bg' => '#2b5c8a', 'col_head_text' => '#ffffff',
+            'col_booked_bg' => '#d6e4f0', 'col_booked_text' => '#1c3d5a',
+            'col_live_bg' => '#2b7bd6', 'col_live_text' => '#ffffff', 'col_accent' => '#c0392b',
+        ],
+        'Grün' => [
+            'col_page' => '#f4f7f2', 'col_head_bg' => '#2f7d3f', 'col_head_text' => '#ffffff',
+            'col_booked_bg' => '#d8eadb', 'col_booked_text' => '#1f3d2a',
+            'col_live_bg' => '#3a9d4e', 'col_live_text' => '#ffffff', 'col_accent' => '#b4441f',
+        ],
+        'Ziegel' => [
+            'col_page' => '#faf5f1', 'col_head_bg' => '#b5531f', 'col_head_text' => '#ffffff',
+            'col_booked_bg' => '#f3e0d3', 'col_booked_text' => '#6b3315',
+            'col_live_bg' => '#e07a34', 'col_live_text' => '#ffffff', 'col_accent' => '#1f6f6f',
+        ],
+        'Grau' => [
+            'col_page' => '#f5f5f5', 'col_head_bg' => '#444444', 'col_head_text' => '#ffffff',
+            'col_booked_bg' => '#e4e4e4', 'col_booked_text' => '#333333',
+            'col_live_bg' => '#666666', 'col_live_text' => '#ffffff', 'col_accent' => '#c0392b',
+        ],
+        'Dunkel' => [
+            'col_page' => '#1e1e1e', 'col_head_bg' => '#111111', 'col_head_text' => '#ffffff',
+            'col_booked_bg' => '#2a2f3a', 'col_booked_text' => '#cfd8e3',
+            'col_live_bg' => '#3b82f6', 'col_live_text' => '#ffffff', 'col_accent' => '#f59e0b',
+        ],
+    ];
+}
+
+/**
+ * Baut aus den gespeicherten Farboptionen eine CSS-Regel, die die
+ * CSS-Variablen auf .availio-dashboard übersteuert.
+ */
+function availio_dash_color_css(array $opts): string
+{
+    $decls = [];
+    foreach (availio_dash_color_fields() as $key => $def) {
+        $hex = sanitize_hex_color((string) ($opts[$key] ?? '')) ?: $def['default'];
+        foreach ($def['vars'] as $var) {
+            $decls[] = $var . ':' . $hex;
+        }
+    }
+    if (!$decls) {
+        return '';
+    }
+    return '.availio-dashboard{' . implode(';', $decls) . '}';
+}
+
 function availio_dash_get_options(): array
 {
     $defaults = [
@@ -135,6 +228,9 @@ function availio_dash_get_options(): array
         'refresh_seconds' => 60,
         'court_filter'    => '',
     ];
+    foreach (availio_dash_color_fields() as $key => $def) {
+        $defaults[$key] = $def['default'];
+    }
     $opts = wp_parse_args(get_option('availio_dash_options', []), $defaults);
 
     // Optional: Zugangsdaten aus wp-config.php-Konstanten übersteuern.
@@ -166,7 +262,7 @@ function availio_dash_const_active(string $field): bool
 
 function availio_dash_sanitize_options(array $input): array
 {
-    return [
+    $out = [
         'base_url'        => esc_url_raw($input['base_url'] ?? 'https://fsa.fairgate.ch'),
         'oid'             => sanitize_text_field($input['oid'] ?? ''),
         'access_key'      => sanitize_text_field($input['access_key'] ?? ''),
@@ -178,6 +274,14 @@ function availio_dash_sanitize_options(array $input): array
         'refresh_seconds' => max(30, min(600, (int) ($input['refresh_seconds'] ?? 60))),
         'court_filter'    => sanitize_text_field($input['court_filter'] ?? ''),
     ];
+
+    // Farben: gültige Hex-Werte übernehmen, sonst auf Standard zurückfallen.
+    foreach (availio_dash_color_fields() as $key => $def) {
+        $val = sanitize_hex_color($input[$key] ?? '');
+        $out[$key] = $val ?: $def['default'];
+    }
+
+    return $out;
 }
 
 // ── Einstellungs-Seite ────────────────────────────────────────────────────────
@@ -323,6 +427,36 @@ function availio_dash_settings_page(): void
                 </tr>
             </table>
 
+            <h2>Farbschema</h2>
+            <p class="description" style="max-width:40em;">
+                Wähle eine Voreinstellung oder passe die Farben einzeln an dein
+                Vereins-Design an. Leeres oder ungültiges Feld setzt auf den Standard zurück.
+            </p>
+            <p>
+                <strong>Voreinstellungen:</strong>&ensp;
+                <?php foreach (array_keys(availio_dash_color_presets()) as $preset): ?>
+                    <button type="button" class="button availio-preset"
+                            data-preset="<?= esc_attr($preset) ?>"><?= esc_html($preset) ?></button>
+                <?php endforeach; ?>
+                <span class="description" style="margin-left:.5em;">(danach speichern nicht vergessen)</span>
+            </p>
+            <table class="form-table" role="presentation">
+                <?php foreach (availio_dash_color_fields() as $key => $def): ?>
+                    <tr>
+                        <th scope="row">
+                            <label for="ad_<?= esc_attr($key) ?>"><?= esc_html($def['label']) ?></label>
+                        </th>
+                        <td>
+                            <input type="text" id="ad_<?= esc_attr($key) ?>"
+                                   class="availio-color-field"
+                                   name="availio_dash_options[<?= esc_attr($key) ?>]"
+                                   value="<?= esc_attr($opts[$key]) ?>"
+                                   data-default-color="<?= esc_attr($def['default']) ?>">
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+
             <?php submit_button('Einstellungen speichern'); ?>
         </form>
 
@@ -376,6 +510,12 @@ add_shortcode('availio_dashboard', function ($atts): string {
 
     wp_enqueue_style('availio-dashboard');
     wp_enqueue_script('availio-dashboard');
+
+    // Individuelles Farbschema als CSS-Variablen einspeisen.
+    $colorCss = availio_dash_color_css($opts);
+    if ($colorCss !== '') {
+        wp_add_inline_style('availio-dashboard', $colorCss);
+    }
 
     $court_filter = array_values(array_filter(
         array_map('trim', explode(',', (string) $opts['court_filter']))
