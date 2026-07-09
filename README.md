@@ -1,5 +1,11 @@
 # Availio Dashboard
 
+[![Release](https://img.shields.io/github/v/release/GianlucaD/wp_availio)](https://github.com/GianlucaD/wp_availio/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/GianlucaD/wp_availio/total)](https://github.com/GianlucaD/wp_availio/releases/latest)
+[![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE)
+
+**➜ [Neueste Version herunterladen (availio-dashboard.zip)](https://github.com/GianlucaD/wp_availio/releases/latest/download/availio-dashboard.zip)**
+
 WordPress-Plugin, das die Platzbelegung deines Vereins aus **Availio** (Fairgate) direkt in WordPress einbindet. Die Daten kommen serverseitig über die offizielle **Fairgate Standard-API (FSA)** und werden als übersichtliches, TV-taugliches Belegungsraster mit Datepicker dargestellt. Einbindung per Shortcode `[availio_dashboard]`.
 
 Der API-Token bleibt ausschliesslich auf dem Server – er wird nie an den Browser ausgeliefert.
@@ -18,7 +24,7 @@ Der API-Token bleibt ausschliesslich auf dem Server – er wird nie an den Brows
 
 ## Installation
 
-1. Neueste Version als ZIP von den [Releases](https://github.com/GianlucaD/wp_availio/releases) laden – oder das Repo klonen und den Ordner nach `wp-content/plugins/availio-dashboard/` kopieren.
+1. [`availio-dashboard.zip` der neuesten Version herunterladen](https://github.com/GianlucaD/wp_availio/releases/latest/download/availio-dashboard.zip) (oder das Repo klonen und den Ordner nach `wp-content/plugins/availio-dashboard/` kopieren).
 2. Plugin in WordPress aktivieren.
 3. Unter **Einstellungen → Availio Dashboard** eintragen:
    - Organisations-ID (OID) deines Clubs
