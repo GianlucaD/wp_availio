@@ -1,0 +1,38 @@
+name: Build plugin ZIP
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ZIP mit sauberem Ordnernamen (availio-dashboard/)
+        run: |
+          set -euo pipefail
+          SLUG=availio-dashboard
+          mkdir -p "build/${SLUG}"
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='build' \
+            --exclude='.gitignore' \
+            --exclude='*.zip' \
+            ./ "build/${SLUG}/"
+          cd build
+          zip -r "../${SLUG}.zip" "${SLUG}" >/dev/null
+          echo "Erstellt: ${SLUG}.zip"
+
+      - name: Release erstellen und ZIP anhängen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: availio-dashboard.zip
+          generate_release_notes: true
