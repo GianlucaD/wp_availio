@@ -1,0 +1,378 @@
+/* availio-dashboard.css – TC ESP Fislisbach Farbschema */
+
+/* ── CSS-Variablen ────────────────────────────────────────────────────────── */
+.availio-dashboard {
+    --ad-bg-page:       #f5f5f5;
+    --ad-bg-free:       #ffffff;
+    --ad-bg-time:       #eeeeee;  /* Helles Grau */
+    --ad-bg-hour:       #e0e0e0;  /* Etwas dunkler für volle Stunden */
+    --ad-bg-head:       #7a9c00;  /* TC ESP Limetten-Grün (Header) */
+    --ad-color-head:    #ffffff;
+    --ad-color-text:    #333333;
+    --ad-color-muted:   #888888;
+    --ad-color-now:     #7a9c00;  /* Dunkles Limetten-Grün */
+    --ad-bg-booked:     #e8f099;  /* Helles Limetten-Gelb */
+    --ad-color-booked:  #3a4a00;  /* Dunkles Olivgrün für Kontrast */
+    --ad-bg-live:       #c7de34;  /* TC ESP Limette – Primärfarbe */
+    --ad-color-live:    #2d3500;  /* Sehr dunkles Olivgrün für Lesbarkeit */
+    --ad-line-now:      #7a9c00;
+    --ad-border:        #d8d8d8;
+    --ad-radius:        6px;
+    --ad-font:          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    font-family: var(--ad-font);
+    font-size: clamp(13px, 1.3vw, 18px);
+    line-height: 1.3;
+    color: var(--ad-color-text);
+    background: var(--ad-bg-page);
+    border-radius: var(--ad-radius);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+
+}
+
+/* ── Fehler-Box ───────────────────────────────────────────────────────────── */
+.availio-error,
+.availio-dashboard .availio-error {
+    margin: 1em;
+    padding: 0.8em 1.1em;
+    border-radius: 4px;
+    background: #fbe7e3;
+    border: 1px solid #d6a59b;
+    color: #6b1f12;
+    font-size: 0.95em;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+.availio-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.45em 0.7em;
+    background: var(--ad-bg-head);
+    border-bottom: 2px solid var(--ad-border);
+    flex-wrap: wrap;
+}
+
+.availio-tab {
+    padding: 0.35em 1em;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-family: var(--ad-font);
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+    white-space: nowrap;
+}
+
+.availio-tab:hover {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+.availio-tab.active {
+    background: rgba(255,255,255,0.22);
+    color: #ffffff;
+}
+
+/* ── Datepicker-Gruppe ────────────────────────────────────────────────────── */
+.availio-date-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.08);
+}
+
+/* Pfeil-Buttons */
+.adn-arrow {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.7em;
+    padding: 0.4em 0.65em;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 150ms, color 150ms;
+    flex-shrink: 0;
+}
+
+.adn-arrow:hover:not(:disabled) {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+}
+
+.adn-arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Datum-Label-Button in der Mitte */
+.adn-label-btn {
+    background: transparent;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    border-right: 1px solid rgba(255,255,255,0.15);
+    border-radius: 0;
+    padding: 0.35em 0.9em;
+    min-width: 11em;
+    text-align: center;
+}
+
+.adn-label-btn.active {
+    background: rgba(255,255,255,0.22);
+}
+
+.availio-updated {
+    margin-left: auto;
+    font-size: 0.8em;
+    color: rgba(246,245,239,0.5);
+    letter-spacing: 0.02em;
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────────── */
+.availio-panel {
+    display: block;
+}
+
+.availio-panel--hidden {
+    display: none;
+}
+
+/* ── Tagesansicht-Grid ────────────────────────────────────────────────────── */
+.availio-day-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(3.8em, 4.5em)
+        repeat(calc(var(--ad-cols) - 1), minmax(0, 1fr));
+    grid-template-rows:
+        2.6em
+        repeat(calc(var(--ad-rows) - 1), minmax(1.4em, 1fr));
+    gap: 1px;
+    background: var(--ad-border);
+    width: 100%;
+    min-height: 40vh;
+    padding: 1px;
+}
+
+/* Zell-Basis */
+.ad-cell {
+    background: var(--ad-bg-free);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding: 0.15em 0.4em;
+    min-width: 0;
+}
+
+/* Kopfzeile */
+.ad-cell.ad-head {
+    background: var(--ad-bg-head);
+    color: var(--ad-color-head);
+    font-weight: 600;
+    font-size: 1em;
+    letter-spacing: 0.02em;
+    padding: 0.4em 0.6em;
+}
+
+.ad-cell.ad-time-head {
+    font-weight: 500;
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Zeit-Spalte */
+.ad-cell.ad-time {
+    background: var(--ad-bg-time);
+    color: var(--ad-color-muted);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.88em;
+    font-weight: 400;
+}
+
+.ad-cell.ad-time.ad-hour {
+    background: var(--ad-bg-hour);
+    color: var(--ad-color-text);
+    font-weight: 600;
+}
+
+.ad-cell.ad-time.ad-now {
+    color: var(--ad-color-now);
+    font-weight: 700;
+    background: var(--ad-bg-hour);
+}
+
+/* Buchungs-Blöcke */
+.ad-cell.ad-block {
+    border-radius: 3px;
+    padding: 0.3em 0.5em;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 180ms ease;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.ad-cell.ad-free {
+    background: var(--ad-bg-free);
+}
+
+.ad-cell.ad-booked {
+    background: var(--ad-bg-booked);
+    color: var(--ad-color-booked);
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.ad-cell.ad-live {
+    background: var(--ad-bg-live);
+    color: var(--ad-color-live);
+    font-weight: 700;
+    font-size: 1em;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.3);
+}
+
+.ad-label {
+    white-space: nowrap;
+    font-size: 0.9em;
+}
+
+/* Jetzt-Linie */
+.ad-now-line {
+    background: var(--ad-line-now);
+    height: 2px;
+    align-self: start;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: 0 0 4px rgba(180, 68, 31, 0.4);
+}
+
+/* ── Wochenansicht-Grid ───────────────────────────────────────────────────── */
+.availio-week-grid {
+    display: grid;
+    /* Erste Spalte: Tag-Label, dann je eine Spalte pro Court */
+    grid-template-columns: minmax(4.5em, 6em) repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1px;
+    background: var(--ad-border);
+    padding: 1px;
+}
+
+/* Eck-Zelle oben links */
+.aw-corner {
+    background: var(--ad-bg-head);
+    padding: 0.5em;
+}
+
+/* Court-Kopfzeile in der Wochenansicht */
+.aw-court-head {
+    background: var(--ad-bg-head);
+    color: var(--ad-color-head);
+    font-weight: 600;
+    font-size: 0.9em;
+    padding: 0.5em 0.6em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+/* Tag-Label links */
+.aw-day-label {
+    background: var(--ad-bg-time);
+    padding: 0.6em 0.5em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1em;
+    text-align: center;
+    min-height: 3.5em;
+}
+
+.aw-day-label.aw-today {
+    background: var(--ad-bg-hour);
+}
+
+.aw-day-name {
+    font-weight: 700;
+    font-size: 0.95em;
+    color: var(--ad-color-text);
+}
+
+.aw-day-label.aw-today .aw-day-name {
+    color: var(--ad-color-now);
+}
+
+.aw-day-date {
+    font-size: 0.8em;
+    color: var(--ad-color-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Buchungs-Zelle */
+.aw-cell {
+    background: var(--ad-bg-free);
+    padding: 0.4em 0.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    min-height: 3.5em;
+}
+
+/* "Frei"-Text */
+.aw-free {
+    font-size: 0.78em;
+    color: var(--ad-color-muted);
+    font-style: italic;
+    align-self: center;
+    margin: auto;
+}
+
+/* Buchungs-Chip */
+.aw-booking {
+    display: inline-block;
+    padding: 0.2em 0.45em;
+    border-radius: 3px;
+    font-size: 0.78em;
+    font-weight: 600;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+}
+
+.aw-booking--booked {
+    background: var(--ad-bg-booked);
+    color: var(--ad-color-booked);
+}
+
+.aw-booking--live {
+    background: var(--ad-bg-live);
+    color: var(--ad-color-live);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.2) inset;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .availio-dashboard {
+        font-size: 12px;
+    }
+
+    .availio-tab {
+        padding: 0.3em 0.7em;
+        font-size: 0.88em;
+    }
+
+    .availio-updated {
+        display: none;
+    }
+
+    .aw-booking {
+        font-size: 0.72em;
+    }
+}

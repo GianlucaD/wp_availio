@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+
+# WordPress / lokale Konfiguration
+config.php
+*.log
+
+# Build / Pakete
+/build/
+/dist/
+*.zip
+node_modules/
+vendor/
