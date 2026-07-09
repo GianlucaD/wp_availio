@@ -4,7 +4,7 @@ Tags: booking, tennis, reservations, availio, fairgate
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,9 @@ Ja, über den Platz-Filter in den Einstellungen (kommagetrennte Platz-IDs).
 
 == Changelog ==
 
+= 1.1.1 =
+* Fix: Datepicker-Pfeile und Tabs folgen jetzt dem Farbschema (Theme-Übersteuerung verhindert).
+
 = 1.1.0 =
 * Neu: Konfigurierbares Farbschema (Farbwähler in den Einstellungen).
 * Neu: Fertige Farb-Voreinstellungen (Blau, Grün, Ziegel, Grau, Dunkel) per Klick.
@@ -81,6 +84,9 @@ Ja, über den Platz-Filter in den Einstellungen (kommagetrennte Platz-IDs).
 * Erste öffentliche Version.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+Behebt blau bleibende Datepicker-Pfeile trotz eigenem Farbschema.
 
 = 1.1.0 =
 Farbschema jetzt in den Einstellungen anpassbar.

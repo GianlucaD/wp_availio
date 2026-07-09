@@ -90,11 +90,17 @@
     background: rgba(255,255,255,0.08);
 }
 
-/* Pfeil-Buttons */
-.adn-arrow {
+/* Pfeil-Buttons.
+   Höhere Spezifität + appearance-Reset, damit das WordPress-Theme die
+   Button-Farbe nicht übersteuert. Farbe folgt der Kopfzeilen-Textfarbe. */
+.availio-dashboard .availio-date-nav .adn-arrow {
+    -webkit-appearance: none;
+    appearance: none;
     background: transparent;
     border: none;
-    color: rgba(255,255,255,0.7);
+    box-shadow: none;
+    text-shadow: none;
+    color: var(--ad-color-head);
     font-size: 0.7em;
     padding: 0.4em 0.65em;
     cursor: pointer;
@@ -103,14 +109,30 @@
     flex-shrink: 0;
 }
 
-.adn-arrow:hover:not(:disabled) {
+.availio-dashboard .availio-date-nav .adn-arrow:hover:not(:disabled) {
     background: rgba(255,255,255,0.18);
-    color: #fff;
+    color: var(--ad-color-head);
 }
 
-.adn-arrow:disabled {
+.availio-dashboard .availio-date-nav .adn-arrow:disabled {
     opacity: 0.3;
     cursor: default;
+}
+
+/* Tab-Buttons theme-fest machen (Farbe = Kopfzeilen-Textfarbe) */
+.availio-dashboard .availio-tabs .availio-tab {
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: none;
+    text-shadow: none;
+    color: var(--ad-color-head);
+    opacity: 0.72;
+}
+
+.availio-dashboard .availio-tabs .availio-tab:hover,
+.availio-dashboard .availio-tabs .availio-tab.active {
+    color: var(--ad-color-head);
+    opacity: 1;
 }
 
 /* Datum-Label-Button in der Mitte */
