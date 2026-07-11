@@ -1,5 +1,6 @@
-# macOS
+# macOS / FUSE-Artefakte
 .DS_Store
+.fuse_hidden*
 
 # Editor / IDE
 .idea/

@@ -26,6 +26,9 @@ jobs:
             --exclude='build' \
             --exclude='.gitignore' \
             --exclude='*.zip' \
+            --exclude='.fuse_hidden*' \
+            --exclude='.DS_Store' \
+            --exclude='.*' \
             ./ "build/${SLUG}/"
           cd build
           zip -r "../${SLUG}.zip" "${SLUG}" >/dev/null
