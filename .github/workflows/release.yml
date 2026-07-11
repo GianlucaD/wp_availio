@@ -18,7 +18,7 @@ jobs:
       - name: Build ZIP mit sauberem Ordnernamen (availio-dashboard/)
         run: |
           set -euo pipefail
-          SLUG=availio-dashboard
+          SLUG=dashboard-for-availio
           mkdir -p "build/${SLUG}"
           rsync -a \
             --exclude='.git' \
@@ -34,5 +34,5 @@ jobs:
       - name: Release erstellen und ZIP anhängen
         uses: softprops/action-gh-release@v2
         with:
-          files: availio-dashboard.zip
+          files: dashboard-for-availio.zip
           generate_release_notes: true

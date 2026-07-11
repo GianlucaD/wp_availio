@@ -7,6 +7,10 @@
 
 declare(strict_types=1);
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Holt Reservationen + Court-Liste von Availio.
  *
@@ -32,16 +36,6 @@ function availio_fetch(array $cfg): array
         (int) $cfg['previous_hours']
     );
 
-    // WordPress-eigene HTTP-API bevorzugt; alternativ cURL als Fallback
-    if (function_exists('wp_remote_get')) {
-        return availio_fetch_wp($url, $cfg);
-    }
-    return availio_fetch_curl($url, $cfg);
-}
-
-/** Fetch via wp_remote_get (bevorzugt in WordPress-Kontext) */
-function availio_fetch_wp(string $url, array $cfg): array
-{
     $response = wp_remote_get($url, [
         'timeout'    => (int) $cfg['http_timeout'],
         'user-agent' => 'availio-wp-dashboard/1.0',
@@ -56,40 +50,8 @@ function availio_fetch_wp(string $url, array $cfg): array
         return ['ok' => false, 'error' => 'Verbindungsfehler: ' . $response->get_error_message()];
     }
 
-    $status = wp_remote_retrieve_response_code($response);
-    $body   = wp_remote_retrieve_body($response);
-
-    return availio_parse_response((int) $status, $body, $cfg);
-}
-
-/** Fetch via cURL (Fallback ausserhalb von WordPress oder für Tests) */
-function availio_fetch_curl(string $url, array $cfg): array
-{
-    if (!function_exists('curl_init')) {
-        return ['ok' => false, 'error' => 'cURL ist nicht verfügbar.'];
-    }
-
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => (int) $cfg['http_timeout'],
-        CURLOPT_USERAGENT      => 'availio-wp-dashboard/1.0',
-        CURLOPT_HTTPHEADER     => [
-            'Authorization: Bearer ' . $cfg['availio_access_key'],
-            'Accept: application/json',
-        ],
-        CURLOPT_SSL_VERIFYPEER => true,
-        CURLOPT_SSL_VERIFYHOST => 2,
-    ]);
-
-    $body   = curl_exec($ch);
-    $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $cerr   = curl_error($ch);
-    curl_close($ch);
-
-    if ($body === false) {
-        return ['ok' => false, 'error' => 'Verbindungsfehler: ' . $cerr];
-    }
+    $status = (int) wp_remote_retrieve_response_code($response);
+    $body   = (string) wp_remote_retrieve_body($response);
 
     return availio_parse_response($status, $body, $cfg);
 }

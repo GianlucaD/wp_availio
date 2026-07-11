@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name:       Availio Dashboard
+ * Plugin Name:       Dashboard for Availio
  * Plugin URI:        https://github.com/GianlucaD/wp_availio
  * Description:       Zeigt Platz-Buchungen aus Availio (Fairgate Standard-API / FSA) als interaktives Dashboard mit Datepicker. Einbindung via Shortcode [availio_dashboard].
- * Version:           1.1.2
+ * Version:           1.1.3
  * Author:            GianlucaD
  * Author URI:        https://github.com/GianlucaD
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       availio-dashboard
+ * Text Domain:       dashboard-for-availio
  * Requires at least: 6.0
  * Requires PHP:      8.0
  */
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AVAILIO_DASH_VERSION', '1.1.2');
+define('AVAILIO_DASH_VERSION', '1.1.3');
 define('AVAILIO_DASH_DIR',     plugin_dir_path(__FILE__));
 define('AVAILIO_DASH_URL',     plugin_dir_url(__FILE__));
 
@@ -31,12 +31,13 @@ add_action('wp_ajax_nopriv_availio_day', 'availio_dash_ajax_day');
 
 function availio_dash_ajax_day(): void
 {
-    if (!wp_verify_nonce($_POST['nonce'] ?? '', 'availio_day')) {
+    $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+    if (!wp_verify_nonce($nonce, 'availio_day')) {
         wp_send_json_error('Ungültige Anfrage.', 403);
         return;
     }
 
-    $date = sanitize_text_field($_POST['date'] ?? '');
+    $date = isset($_POST['date']) ? sanitize_text_field(wp_unslash($_POST['date'])) : '';
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         wp_send_json_error('Ungültiges Datum.');
         return;
@@ -106,8 +107,8 @@ function availio_dash_ajax_day(): void
 // ── Admin-Menü ────────────────────────────────────────────────────────────────
 add_action('admin_menu', function (): void {
     add_options_page(
-        'Availio Dashboard',
-        'Availio Dashboard',
+        'Dashboard for Availio',
+        'Dashboard for Availio',
         'manage_options',
         'availio-dashboard',
         'availio_dash_settings_page'
@@ -290,7 +291,7 @@ function availio_dash_settings_page(): void
     $opts = availio_dash_get_options();
     ?>
     <div class="wrap">
-        <h1>Availio Dashboard – Einstellungen</h1>
+        <h1>Dashboard for Availio – Einstellungen</h1>
         <p>Konfiguriere hier die Verbindung zur Availio (Fairgate FSA) API und die Anzeige-Optionen.</p>
 
         <form method="post" action="options.php">
@@ -314,12 +315,12 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="text" id="ad_oid"
                                name="availio_dash_options[oid]"
-                               value="<?= esc_attr($opts['oid']) ?>"
+                               value="<?php echo esc_attr($opts['oid']); ?>"
                                class="regular-text" autocomplete="off"
-                               <?= $oidConst ? 'readonly' : '' ?>>
+                               <?php echo $oidConst ? 'readonly' : ''; ?>>
                         <p class="description">
                             Die OID deines Clubs in der Availio-URL.
-                            <?= $oidConst ? '<strong>Per <code>AVAILIO_OID</code> in wp-config.php gesetzt.</strong>' : '' ?>
+                            <?php echo $oidConst ? '<strong>Per <code>AVAILIO_OID</code> in wp-config.php gesetzt.</strong>' : ''; ?>
                         </p>
                     </td>
                 </tr>
@@ -328,12 +329,12 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="password" id="ad_key"
                                name="availio_dash_options[access_key]"
-                               value="<?= $keyConst ? '' : esc_attr($opts['access_key']) ?>"
+                               value="<?php echo $keyConst ? '' : esc_attr($opts['access_key']); ?>"
                                class="regular-text" autocomplete="off"
-                               <?= $keyConst ? 'readonly placeholder="(über wp-config.php gesetzt)"' : '' ?>>
+                               <?php echo $keyConst ? 'readonly placeholder="(über wp-config.php gesetzt)"' : ''; ?>>
                         <p class="description">
                             JWT Bearer-Token aus den Availio-Einstellungen.
-                            <?= $keyConst ? '<strong>Per <code>AVAILIO_ACCESS_KEY</code> in wp-config.php gesetzt.</strong>' : '' ?>
+                            <?php echo $keyConst ? '<strong>Per <code>AVAILIO_ACCESS_KEY</code> in wp-config.php gesetzt.</strong>' : ''; ?>
                         </p>
                     </td>
                 </tr>
@@ -342,12 +343,12 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="url" id="ad_base"
                                name="availio_dash_options[base_url]"
-                               value="<?= esc_attr($opts['base_url']) ?>"
+                               value="<?php echo esc_attr($opts['base_url']); ?>"
                                class="regular-text"
-                               <?= $baseConst ? 'readonly' : '' ?>>
+                               <?php echo $baseConst ? 'readonly' : ''; ?>>
                         <p class="description">
                             Standard: <code>https://fsa.fairgate.ch</code>
-                            <?= $baseConst ? '<strong>Per <code>AVAILIO_BASE_URL</code> in wp-config.php gesetzt.</strong>' : '' ?>
+                            <?php echo $baseConst ? '<strong>Per <code>AVAILIO_BASE_URL</code> in wp-config.php gesetzt.</strong>' : ''; ?>
                         </p>
                     </td>
                 </tr>
@@ -360,7 +361,7 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="text" id="ad_club"
                                name="availio_dash_options[club_name]"
-                               value="<?= esc_attr($opts['club_name']) ?>"
+                               value="<?php echo esc_attr($opts['club_name']); ?>"
                                class="regular-text">
                     </td>
                 </tr>
@@ -369,7 +370,7 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="text" id="ad_tz"
                                name="availio_dash_options[time_zone]"
-                               value="<?= esc_attr($opts['time_zone']) ?>"
+                               value="<?php echo esc_attr($opts['time_zone']); ?>"
                                class="regular-text">
                         <p class="description">z.B. <code>Europe/Zurich</code></p>
                     </td>
@@ -381,7 +382,7 @@ function availio_dash_settings_page(): void
                             Von Stunde:
                             <input type="number"
                                    name="availio_dash_options[day_start_hour]"
-                                   value="<?= (int) $opts['day_start_hour'] ?>"
+                                   value="<?php echo (int) $opts['day_start_hour']; ?>"
                                    min="0" max="23" style="width:4.5em">
                         </label>
                         &ensp;
@@ -389,7 +390,7 @@ function availio_dash_settings_page(): void
                             Bis Stunde:
                             <input type="number"
                                    name="availio_dash_options[day_end_hour]"
-                                   value="<?= (int) $opts['day_end_hour'] ?>"
+                                   value="<?php echo (int) $opts['day_end_hour']; ?>"
                                    min="1" max="24" style="width:4.5em">
                         </label>
                         <p class="description">Angezeigter Zeitbereich (Stunden 0–24).</p>
@@ -400,7 +401,7 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="number" id="ad_slot"
                                name="availio_dash_options[slot_minutes]"
-                               value="<?= (int) $opts['slot_minutes'] ?>"
+                               value="<?php echo (int) $opts['slot_minutes']; ?>"
                                min="15" max="60" step="15" style="width:5em">
                         Minuten
                     </td>
@@ -410,7 +411,7 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="number" id="ad_refresh"
                                name="availio_dash_options[refresh_seconds]"
-                               value="<?= (int) $opts['refresh_seconds'] ?>"
+                               value="<?php echo (int) $opts['refresh_seconds']; ?>"
                                min="30" max="600" style="width:5em">
                         Sekunden
                     </td>
@@ -420,7 +421,7 @@ function availio_dash_settings_page(): void
                     <td>
                         <input type="text" id="ad_filter"
                                name="availio_dash_options[court_filter]"
-                               value="<?= esc_attr($opts['court_filter']) ?>"
+                               value="<?php echo esc_attr($opts['court_filter']); ?>"
                                class="regular-text">
                         <p class="description">Komma-getrennte Court-IDs (leer = alle anzeigen).</p>
                     </td>
@@ -436,7 +437,7 @@ function availio_dash_settings_page(): void
                 <strong>Voreinstellungen:</strong>&ensp;
                 <?php foreach (array_keys(availio_dash_color_presets()) as $preset): ?>
                     <button type="button" class="button availio-preset"
-                            data-preset="<?= esc_attr($preset) ?>"><?= esc_html($preset) ?></button>
+                            data-preset="<?php echo esc_attr($preset); ?>"><?php echo esc_html($preset); ?></button>
                 <?php endforeach; ?>
                 <span class="description" style="margin-left:.5em;">(danach speichern nicht vergessen)</span>
             </p>
@@ -444,14 +445,14 @@ function availio_dash_settings_page(): void
                 <?php foreach (availio_dash_color_fields() as $key => $def): ?>
                     <tr>
                         <th scope="row">
-                            <label for="ad_<?= esc_attr($key) ?>"><?= esc_html($def['label']) ?></label>
+                            <label for="ad_<?php echo esc_attr($key); ?>"><?php echo esc_html($def['label']); ?></label>
                         </th>
                         <td>
-                            <input type="text" id="ad_<?= esc_attr($key) ?>"
+                            <input type="text" id="ad_<?php echo esc_attr($key); ?>"
                                    class="availio-color-field"
-                                   name="availio_dash_options[<?= esc_attr($key) ?>]"
-                                   value="<?= esc_attr($opts[$key]) ?>"
-                                   data-default-color="<?= esc_attr($def['default']) ?>">
+                                   name="availio_dash_options[<?php echo esc_attr($key); ?>]"
+                                   value="<?php echo esc_attr($opts[$key]); ?>"
+                                   data-default-color="<?php echo esc_attr($def['default']); ?>">
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -503,8 +504,8 @@ add_shortcode('availio_dashboard', function ($atts): string {
 
     if (empty($opts['oid']) || empty($opts['access_key'])) {
         return '<div class="availio-error">'
-            . '<strong>Availio Dashboard:</strong> API-Zugangsdaten fehlen. '
-            . 'Bitte unter <em>Einstellungen → Availio Dashboard</em> konfigurieren.'
+            . '<strong>Dashboard for Availio:</strong> API-Zugangsdaten fehlen. '
+            . 'Bitte unter <em>Einstellungen → Dashboard for Availio</em> konfigurieren.'
             . '</div>';
     }
 
@@ -565,7 +566,7 @@ add_shortcode('availio_dashboard', function ($atts): string {
     <div class="availio-dashboard">
 
         <?php if (!empty($opts['club_name'])): ?>
-            <div class="availio-title"><?= esc_html($opts['club_name']) ?></div>
+            <div class="availio-title"><?php echo esc_html($opts['club_name']); ?></div>
         <?php endif; ?>
 
         <!-- Tab-Leiste mit Datepicker -->
@@ -581,14 +582,14 @@ add_shortcode('availio_dashboard', function ($atts): string {
                 <button class="availio-tab adn-label-btn"
                         role="tab" aria-selected="false"
                         data-target="availio-date"
-                        id="availio-date-tab"><?= esc_html(availio_dash_date_label($todayDt)) ?></button>
+                        id="availio-date-tab"><?php echo esc_html(availio_dash_date_label($todayDt)); ?></button>
                 <button class="adn-arrow" id="availio-next-day"
                         aria-label="Nächster Tag">&#9654;</button>
             </div>
 
             <span class="availio-updated">
                 Aktualisiert:
-                <?= esc_html($todayDt->format('H:i')) ?> Uhr
+                <?php echo esc_html($todayDt->format('H:i')); ?> Uhr
             </span>
         </div>
 
@@ -625,14 +626,14 @@ function availio_render_day_grid(array $api, array $grid): void
     }
     ?>
     <div class="availio-day-grid"
-         style="--ad-cols:<?= $colCount ?>; --ad-rows:<?= $rowCount ?>;">
+         style="--ad-cols:<?php echo (int) $colCount; ?>; --ad-rows:<?php echo (int) $rowCount; ?>;">
 
         <div class="ad-cell ad-head ad-time-head"
              style="grid-column:1; grid-row:1;">Zeit</div>
         <?php foreach ($courts as $i => $court): ?>
             <div class="ad-cell ad-head ad-court-head"
-                 style="grid-column:<?= $i + 2 ?>; grid-row:1;">
-                <?= esc_html($court['name']) ?>
+                 style="grid-column:<?php echo (int) ($i + 2); ?>; grid-row:1;">
+                <?php echo esc_html($court['name']); ?>
             </div>
         <?php endforeach; ?>
 
@@ -641,9 +642,9 @@ function availio_render_day_grid(array $api, array $grid): void
             if (str_ends_with($label, ':00')) $cls[] = 'ad-hour';
             if ($idx === $nowIdx)             $cls[] = 'ad-now';
         ?>
-            <div class="<?= implode(' ', $cls) ?>"
-                 style="grid-column:1; grid-row:<?= $idx + 2 ?>;">
-                <?= esc_html($label) ?>
+            <div class="<?php echo esc_attr(implode(' ', $cls)); ?>"
+                 style="grid-column:1; grid-row:<?php echo (int) ($idx + 2); ?>;">
+                <?php echo esc_html($label); ?>
             </div>
         <?php endforeach; ?>
 
@@ -654,10 +655,10 @@ function availio_render_day_grid(array $api, array $grid): void
                 $rowSpan = $block['endIdx'] - $block['startIdx'];
                 $cls     = ['ad-cell', 'ad-block', 'ad-' . $block['type']];
         ?>
-            <div class="<?= implode(' ', $cls) ?>"
-                 style="grid-column:<?= $col ?>; grid-row:<?= $row ?> / span <?= $rowSpan ?>;">
+            <div class="<?php echo esc_attr(implode(' ', $cls)); ?>"
+                 style="grid-column:<?php echo (int) $col; ?>; grid-row:<?php echo (int) $row; ?> / span <?php echo (int) $rowSpan; ?>;">
                 <?php if ($block['label']): ?>
-                    <span class="ad-label"><?= esc_html($block['label']) ?></span>
+                    <span class="ad-label"><?php echo esc_html($block['label']); ?></span>
                 <?php endif; ?>
             </div>
         <?php
@@ -666,7 +667,7 @@ function availio_render_day_grid(array $api, array $grid): void
 
         <?php if ($nowVisible): ?>
             <div class="ad-now-line"
-                 style="grid-row:<?= $nowIdx + 2 ?>; grid-column:1 / -1;"></div>
+                 style="grid-row:<?php echo (int) ($nowIdx + 2); ?>; grid-column:1 / -1;"></div>
         <?php endif; ?>
 
     </div>
