@@ -45,6 +45,16 @@
     font-size: 0.95em;
 }
 
+/* ── Titel (Club-Name) ────────────────────────────────────────────────────── */
+.availio-dashboard .availio-title {
+    background: var(--ad-bg-head);
+    color: var(--ad-color-head);
+    font-size: 1.15em;
+    font-weight: 700;
+    line-height: 1.2;
+    padding: 0.55em 0.9em 0.15em;
+}
+
 /* ── Tabs ─────────────────────────────────────────────────────────────────── */
 .availio-tabs {
     display: flex;

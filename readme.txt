@@ -4,7 +4,7 @@ Tags: booking, tennis, reservations, availio, fairgate
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,9 @@ Ja, über den Platz-Filter in den Einstellungen (kommagetrennte Platz-IDs).
 
 == Changelog ==
 
+= 1.1.2 =
+* Neu: Club-Name wird als Titel über dem Dashboard angezeigt (wenn gesetzt).
+
 = 1.1.1 =
 * Fix: Datepicker-Pfeile und Tabs folgen jetzt dem Farbschema (Theme-Übersteuerung verhindert).
 
@@ -84,6 +87,9 @@ Ja, über den Platz-Filter in den Einstellungen (kommagetrennte Platz-IDs).
 * Erste öffentliche Version.
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+Der Club-Name erscheint jetzt als Titel über dem Dashboard.
 
 = 1.1.1 =
 Behebt blau bleibende Datepicker-Pfeile trotz eigenem Farbschema.

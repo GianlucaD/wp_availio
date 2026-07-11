@@ -3,7 +3,7 @@
  * Plugin Name:       Availio Dashboard
  * Plugin URI:        https://github.com/GianlucaD/wp_availio
  * Description:       Zeigt Platz-Buchungen aus Availio (Fairgate Standard-API / FSA) als interaktives Dashboard mit Datepicker. Einbindung via Shortcode [availio_dashboard].
- * Version:           1.1.1
+ * Version:           1.1.2
  * Author:            GianlucaD
  * Author URI:        https://github.com/GianlucaD
  * License:           GPL-2.0-or-later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AVAILIO_DASH_VERSION', '1.1.1');
+define('AVAILIO_DASH_VERSION', '1.1.2');
 define('AVAILIO_DASH_DIR',     plugin_dir_path(__FILE__));
 define('AVAILIO_DASH_URL',     plugin_dir_url(__FILE__));
 
@@ -563,6 +563,10 @@ add_shortcode('availio_dashboard', function ($atts): string {
     ob_start();
     ?>
     <div class="availio-dashboard">
+
+        <?php if (!empty($opts['club_name'])): ?>
+            <div class="availio-title"><?= esc_html($opts['club_name']) ?></div>
+        <?php endif; ?>
 
         <!-- Tab-Leiste mit Datepicker -->
         <div class="availio-tabs" role="tablist">
