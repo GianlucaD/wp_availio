@@ -4,7 +4,7 @@ Tags: booking, tennis, reservations, availio, fairgate
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,9 @@ Yes, via the court filter in the settings (comma-separated court IDs).
 
 == Changelog ==
 
+= 1.2.0 =
+* New: admin notice warns before the API token expires (and when it has expired), read from the token's expiry date.
+
 = 1.1.3 =
 * WordPress.org preparation: external services disclosure, security hardening, plugin name "Dashboard for Availio", English readme.
 
@@ -102,6 +105,9 @@ Yes, via the court filter in the settings (comma-separated court IDs).
 * First public release.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds an admin warning before the API token expires.
 
 = 1.1.3 =
 Prepared for the WordPress.org directory (English readme, security hardening).

@@ -3,7 +3,7 @@
  * Plugin Name:       Dashboard for Availio
  * Plugin URI:        https://github.com/GianlucaD/wp_availio
  * Description:       Zeigt Platz-Buchungen aus Availio (Fairgate Standard-API / FSA) als interaktives Dashboard mit Datepicker. Einbindung via Shortcode [availio_dashboard].
- * Version:           1.1.3
+ * Version:           1.2.0
  * Author:            GianlucaD
  * Author URI:        https://github.com/GianlucaD
  * License:           GPL-2.0-or-later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AVAILIO_DASH_VERSION', '1.1.3');
+define('AVAILIO_DASH_VERSION', '1.2.0');
 define('AVAILIO_DASH_DIR',     plugin_dir_path(__FILE__));
 define('AVAILIO_DASH_URL',     plugin_dir_url(__FILE__));
 
@@ -143,6 +143,65 @@ add_action('admin_enqueue_scripts', function (string $hook): void {
         . '});';
     wp_add_inline_script('wp-color-picker', $js);
 });
+
+// ── Admin-Hinweis: Token-Ablauf ───────────────────────────────────────────────
+// Liest das Ablaufdatum (exp) aus dem JWT und warnt rechtzeitig im Admin.
+add_action('admin_notices', function (): void {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    $opts = availio_dash_get_options();
+    $key  = (string) ($opts['access_key'] ?? '');
+    if ($key === '') {
+        return;
+    }
+    $exp = availio_dash_token_exp($key);
+    if ($exp === null) {
+        return; // kein lesbares Ablaufdatum (z.B. anderes Token-Format)
+    }
+
+    $now         = time();
+    $days        = (int) floor(($exp - $now) / DAY_IN_SECONDS);
+    $settingsUrl = admin_url('options-general.php?page=availio-dashboard');
+
+    if ($exp <= $now) {
+        printf(
+            '<div class="notice notice-error"><p><strong>Dashboard for Availio:</strong> Der API-Token ist abgelaufen. Bitte einen neuen Token in den <a href="%s">Einstellungen</a> eintragen.</p></div>',
+            esc_url($settingsUrl)
+        );
+    } elseif ($days <= 30) {
+        printf(
+            '<div class="notice notice-warning"><p><strong>Dashboard for Availio:</strong> Der API-Token läuft in %d Tagen ab (%s). Bitte rechtzeitig in den <a href="%s">Einstellungen</a> erneuern.</p></div>',
+            (int) $days,
+            esc_html(date_i18n(get_option('date_format'), $exp)),
+            esc_url($settingsUrl)
+        );
+    }
+});
+
+/**
+ * Liest das Ablaufdatum (exp-Claim) aus einem JWT.
+ *
+ * @return int|null Unix-Timestamp oder null, wenn nicht lesbar.
+ */
+function availio_dash_token_exp(string $jwt): ?int
+{
+    $parts = explode('.', $jwt);
+    if (count($parts) < 2) {
+        return null;
+    }
+    $payload = strtr($parts[1], '-_', '+/');
+    $payload .= str_repeat('=', (4 - strlen($payload) % 4) % 4);
+    $json = base64_decode($payload, true);
+    if ($json === false) {
+        return null;
+    }
+    $data = json_decode($json, true);
+    if (!is_array($data) || !isset($data['exp'])) {
+        return null;
+    }
+    return (int) $data['exp'];
+}
 
 /**
  * Konfigurierbare Farben: Schlüssel => [Label, Standardwert, CSS-Variable(n)].
