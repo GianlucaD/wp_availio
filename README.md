@@ -28,7 +28,9 @@ Der API-Token bleibt ausschliesslich auf dem Server – er wird nie an den Brows
 2. Plugin in WordPress aktivieren.
 3. Unter **Einstellungen → Dashboard for Availio** eintragen:
    - Organisations-ID (OID) deines Clubs
-   - API-Key (Bearer/JWT-Token) aus den Availio-Einstellungen
+   - API-Token aus den Availio-Einstellungen
+
+> **Wichtig – richtige Authentifizierungsmethode wählen:** In Availio unter „Authentifizierungsmethoden" die Option **„Spezifischer kurzer API-Token"** wählen (langlebig, ohne Ablaufzeit) – nicht JWT. Ein JWT läuft automatisch ab, wodurch das Dashboard bis zur Token-Erneuerung ausfällt. Der spezifische API-Token wird auf Anfrage vom Fairgate-Support eingerichtet.
 4. Optional die Anzeige-Optionen anpassen.
 5. Shortcode `[availio_dashboard]` auf einer Seite oder in einem Widget einfügen.
 
@@ -39,7 +41,7 @@ Einen API-Zugang (OID und Token) erhältst du über deinen Availio-/Fairgate-Ver
 | Einstellung        | Beschreibung                                             |
 |--------------------|---------------------------------------------------------|
 | Organisations-ID   | OID deines Clubs in Availio                              |
-| API-Key            | JWT-/Bearer-Token aus den Availio-Einstellungen          |
+| API-Key            | API-Token aus Availio (empfohlen: spezifischer kurzer API-Token) |
 | API-Basis-URL      | Standard: `https://fsa.fairgate.ch`                      |
 | Club-Name          | Anzeige in der Kopfzeile                                 |
 | Zeitzone           | z. B. `Europe/Zurich`                                    |

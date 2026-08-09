@@ -384,7 +384,7 @@ function availio_dash_settings_page(): void
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="ad_key">API-Key (Bearer Token)</label></th>
+                    <th scope="row"><label for="ad_key">API-Token</label></th>
                     <td>
                         <input type="password" id="ad_key"
                                name="availio_dash_options[access_key]"
@@ -392,7 +392,11 @@ function availio_dash_settings_page(): void
                                class="regular-text" autocomplete="off"
                                <?php echo $keyConst ? 'readonly placeholder="(über wp-config.php gesetzt)"' : ''; ?>>
                         <p class="description">
-                            JWT Bearer-Token aus den Availio-Einstellungen.
+                            API-Token aus den Availio-Einstellungen.
+                            <strong>Wichtig:</strong> In Availio unter „Authentifizierungsmethoden“ die Option
+                            <em>„Spezifischer kurzer API-Token“</em> wählen (langlebig, ohne Ablaufzeit).
+                            Ein JWT läuft automatisch ab, wodurch das Dashboard regelmässig ausfällt.
+                            Der spezifische API-Token wird auf Anfrage vom Fairgate-Support eingerichtet.
                             <?php echo $keyConst ? '<strong>Per <code>AVAILIO_ACCESS_KEY</code> in wp-config.php gesetzt.</strong>' : ''; ?>
                         </p>
                     </td>

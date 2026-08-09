@@ -48,16 +48,24 @@ Privacy policy: https://fairgate.ch/datenschutzerklarung/
 1. Upload the plugin as a ZIP via *Plugins → Add New → Upload Plugin* and activate it (or copy the `dashboard-for-availio` folder to `wp-content/plugins/`).
 2. Go to *Settings → Dashboard for Availio* and enter your credentials:
    * **Organisation ID (OID)** of your club
-   * **API key (Bearer/JWT token)** from your Availio settings
+   * **API token** from your Availio settings
 3. Optionally adjust the display options (range, slot size, auto-refresh, colors, court filter).
 4. Add the shortcode `[availio_dashboard]` to a page, post or widget.
 
 You obtain API access (OID and token) through your Availio/Fairgate contract; the FSA must be enabled for your organisation.
 
+**Important – choose the right authentication method:** in Availio, under "Authentication methods", select the **specific short API token** (long-lived, no expiry). The JWT option expires automatically, which makes the dashboard stop working until you renew the token. The specific API token is set up by Fairgate support on request.
+
 == Frequently Asked Questions ==
 
 = Where do I get the OID and the API token? =
 Both come from the Availio/Fairgate settings of your organisation. The Fairgate Standard API (FSA) must be booked/enabled for your account.
+
+= Which authentication method should I choose in Availio? =
+Choose the **specific short API token** (long-lived, no expiry), not the JWT option. A JWT expires automatically, so the dashboard stops working until you enter a new token. The specific API token is set up by Fairgate support on request.
+
+= My dashboard shows "token invalid or expired (HTTP 401)" =
+Your token has expired or is no longer valid. Enter a new token in the settings. To avoid this happening again, switch to the specific short API token in Availio (see above). The plugin also shows an admin notice before a token expires.
 
 = Are the names of the people who booked shown? =
 No. The official FSA returns reservations as anonymous time slots. The dashboard therefore only shows when a court is occupied, not by whom.
@@ -86,6 +94,7 @@ Yes, via the court filter in the settings (comma-separated court IDs).
 
 = 1.2.0 =
 * New: admin notice warns before the API token expires (and when it has expired), read from the token's expiry date.
+* Docs: recommend the specific short API token (long-lived) instead of JWT in Availio's authentication settings.
 
 = 1.1.3 =
 * WordPress.org preparation: external services disclosure, security hardening, plugin name "Dashboard for Availio", English readme.
