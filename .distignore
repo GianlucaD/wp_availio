@@ -1,0 +1,11 @@
+# Dateien, die NICHT ins WordPress.org-SVN (trunk/tags) sollen.
+/.git
+/.github
+/.gitignore
+/.distignore
+/README.md
+/build
+*.zip
+.DS_Store
+.fuse_hidden*
+node_modules
