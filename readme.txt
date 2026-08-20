@@ -2,9 +2,9 @@
 Contributors: gianlucad
 Tags: booking, tennis, reservations, availio, fairgate
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,9 @@ Yes, via the court filter in the settings (comma-separated court IDs).
 
 == Changelog ==
 
+= 1.2.1 =
+* Tested with WordPress 7.1.
+
 = 1.2.0 =
 * New: admin notice warns before the API token expires (and when it has expired), read from the token's expiry date.
 * Docs: recommend the specific short API token (long-lived) instead of JWT in Availio's authentication settings.
@@ -114,6 +117,9 @@ Yes, via the court filter in the settings (comma-separated court IDs).
 * First public release.
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+Compatibility update for WordPress 7.1.
 
 = 1.2.0 =
 Adds an admin warning before the API token expires.
