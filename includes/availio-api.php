@@ -1,8 +1,8 @@
 <?php
 // includes/availio-api.php
 // -----------------------------------------------------------------------------
-// Availio (Fairgate FSA) API-Client – WordPress-Plugin-Version.
-// Hält den Bearer-Token serverseitig; er wird nie an den Browser übergeben.
+// Availio (Fairgate FSA) API client – WordPress plugin version.
+// Keeps the bearer token server-side; it is never passed to the browser.
 // -----------------------------------------------------------------------------
 
 declare(strict_types=1);
@@ -12,10 +12,10 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Holt Reservationen + Court-Liste von Availio.
+ * Fetches reservations and the court list from Availio.
  *
- * WICHTIG: Fairgate FSA liefert HTTP 500, wenn kein User-Agent-Header gesetzt ist.
- *          CURLOPT_USERAGENT muss deshalb immer explizit gesetzt werden.
+ * IMPORTANT: the Fairgate FSA returns HTTP 500 when no User-Agent header is set,
+ *            so the user agent must always be passed explicitly.
  *
  * @return array{
  *     ok: bool,
@@ -47,7 +47,14 @@ function availio_fetch(array $cfg): array
     ]);
 
     if (is_wp_error($response)) {
-        return ['ok' => false, 'error' => 'Verbindungsfehler: ' . $response->get_error_message()];
+        return [
+            'ok'    => false,
+            'error' => sprintf(
+                /* translators: %s: error message from the HTTP request. */
+                __('Connection error: %s', 'dashboard-for-availio'),
+                $response->get_error_message()
+            ),
+        ];
     }
 
     $status = (int) wp_remote_retrieve_response_code($response);
@@ -56,25 +63,38 @@ function availio_fetch(array $cfg): array
     return availio_parse_response($status, $body, $cfg);
 }
 
-/** Gemeinsame Response-Verarbeitung */
+/** Shared response handling */
 function availio_parse_response(int $status, string $body, array $cfg): array
 {
     if ($status === 401) {
-        return ['ok' => false, 'error' => 'Token ungültig oder abgelaufen (HTTP 401).'];
+        return [
+            'ok'    => false,
+            'error' => __('Token invalid or expired (HTTP 401).', 'dashboard-for-availio'),
+        ];
     }
     if ($status !== 200) {
-        return ['ok' => false, 'error' => "API-Fehler HTTP {$status}."];
+        return [
+            'ok'    => false,
+            'error' => sprintf(
+                /* translators: %d: HTTP status code. */
+                __('API error: HTTP %d.', 'dashboard-for-availio'),
+                $status
+            ),
+        ];
     }
 
     $json = json_decode($body, true);
     if (!is_array($json) || !isset($json['data'])) {
-        return ['ok' => false, 'error' => 'API-Antwort konnte nicht geparst werden.'];
+        return [
+            'ok'    => false,
+            'error' => __('The API response could not be parsed.', 'dashboard-for-availio'),
+        ];
     }
 
     $data   = $json['data'];
     $courts = $data['club']['courts'] ?? [];
 
-    // Optional: Court-Filter anwenden
+    // Optional: apply the court filter
     if (!empty($cfg['court_filter'])) {
         $allow  = array_flip($cfg['court_filter']);
         $courts = array_values(array_filter(
@@ -83,7 +103,7 @@ function availio_parse_response(int $status, string $body, array $cfg): array
         ));
     }
 
-    // Stornierte Reservationen ausfiltern
+    // Filter out cancelled reservations
     $reservations = array_values(array_filter(
         $data['reservations'] ?? [],
         static fn($r) => empty($r['deleteTimestamp'])
@@ -98,13 +118,13 @@ function availio_parse_response(int $status, string $body, array $cfg): array
     ];
 }
 
-// ── Tagesansicht-Grid ─────────────────────────────────────────────────────────
+// ── Day-view grid ─────────────────────────────────────────────────────────
 
 /**
- * Baut ein Grid für die Tagesansicht.
+ * Builds the grid for the day view.
  *
- * Jede Reservation wird zu einem Block; freie Bereiche ebenfalls als Blöcke
- * (für row-span-Rendering ohne Lücken).
+ * Every reservation becomes a block; free ranges become blocks as well,
+ * so that row-span rendering has no gaps.
  *
  * @return array{
  *     slotLabels: list<string>,
@@ -133,7 +153,7 @@ function availio_build_day_grid(array $api, array $cfg, DateTimeZone $tz): array
 
     $nowIdx = (int) floor(($now - $dayStart) / ($slotMin * 60));
 
-    // Belegungs-Map aufbauen: [courtId][slotIdx] => resInfo|null
+    // Build the occupancy map: [courtId][slotIdx] => resInfo|null
     $occupiedBy = [];
     foreach ($api['courts'] as $court) {
         $occupiedBy[$court['id']] = array_fill(0, $slotCount, null);
@@ -171,7 +191,7 @@ function availio_build_day_grid(array $api, array $cfg, DateTimeZone $tz): array
         }
     }
 
-    // Belegungs-Maps in zusammenhängende Blöcke umwandeln
+    // Turn the occupancy maps into contiguous blocks
     $columns = [];
     foreach ($api['courts'] as $court) {
         $cid    = $court['id'];
@@ -216,89 +236,3 @@ function availio_build_day_grid(array $api, array $cfg, DateTimeZone $tz): array
     ];
 }
 
-// ── Wochenansicht-Daten ───────────────────────────────────────────────────────
-
-/**
- * Bereitet Daten für die Wochenansicht auf.
- *
- * Gibt für jeden Tag der nächsten 7 Tage pro Court eine Liste
- * von Buchungen zurück.
- *
- * @return array{
- *     courts: list<array>,
- *     days: list<array{date: string, dayName: string, dateLabel: string, courts: array}>,
- * }
- */
-function availio_build_week_data(array $api, array $cfg, DateTimeZone $tz, int $nextHours = 72): array
-{
-    $now      = $api['currentTimestamp'];
-    $slotMin  = max(15, (int) $cfg['slot_minutes']);
-    $courts   = $api['courts'];
-
-    // Anzahl Tage aus dem API-Fenster berechnen (mindestens 1, höchstens 14)
-    $daysToShow = max(1, min(14, (int) ceil($nextHours / 24)));
-
-    $days = [];
-    $todayBase = (new DateTimeImmutable("@$now"))->setTimezone($tz)->setTime(0, 0);
-
-    $dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-
-    for ($d = 0; $d < $daysToShow; $d++) {
-        $dayDt    = $todayBase->modify("+{$d} days");
-        $dayStart = $dayDt->setTime((int) $cfg['day_start_hour'], 0)->getTimestamp();
-        $dayEnd   = $dayDt->setTime((int) $cfg['day_end_hour'], 0)->getTimestamp();
-        $dateStr  = $dayDt->format('Y-m-d');
-
-        // Buchungen für diesen Tag aufsammeln
-        $courtBookings = [];
-        foreach ($courts as $court) {
-            $courtBookings[$court['id']] = [];
-        }
-
-        foreach ($api['reservations'] as $res) {
-            $start = (int) $res['startTimestamp'];
-            $end   = (int) $res['endTimestamp'];
-
-            // Überschneidung mit diesem Tag?
-            if ($end <= $dayStart || $start >= $dayEnd) {
-                continue;
-            }
-
-            $isLive   = $start <= $now && $now < $end;
-            $startTxt = (new DateTimeImmutable('@' . max($start, $dayStart)))->setTimezone($tz)->format('H:i');
-            $endTxt   = (new DateTimeImmutable('@' . min($end, $dayEnd)))->setTimezone($tz)->format('H:i');
-
-            $booking = [
-                'type'  => $isLive ? 'live' : 'booked',
-                'label' => "{$startTxt}\u{2013}{$endTxt}",
-                'start' => $start,
-            ];
-
-            foreach ((array) $res['courts'] as $courtId) {
-                if (isset($courtBookings[$courtId])) {
-                    $courtBookings[$courtId][] = $booking;
-                }
-            }
-        }
-
-        // Buchungen pro Court nach Startzeit sortieren
-        foreach ($courtBookings as &$bookingList) {
-            usort($bookingList, static fn($a, $b) => $a['start'] <=> $b['start']);
-        }
-        unset($bookingList);
-
-        $dow = (int) $dayDt->format('w');   // 0 = Sonntag
-
-        $days[] = [
-            'date'      => $dateStr,
-            'dayName'   => $dayNames[$dow],
-            'dateLabel' => $dayDt->format('d.m.'),
-            'courts'    => $courtBookings,
-        ];
-    }
-
-    return [
-        'courts' => $courts,
-        'days'   => $days,
-    ];
-}

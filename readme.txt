@@ -4,7 +4,7 @@ Tags: booking, tennis, reservations, availio, fairgate
 Requires at least: 6.0
 Tested up to: 7.2
 Requires PHP: 8.0
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,7 @@ The API token stays exclusively on the server; it is never sent to the browser.
 * Optional court filter (show only selected courts)
 * Embed via the `[availio_dashboard]` shortcode
 * Token kept server-side, no credentials in the HTML/JS
+* Fully translatable; dates follow your WordPress site language
 
 Please note: the Fairgate Standard API returns reservations as anonymous time slots (without player names). The dashboard therefore shows the occupancy, not the names of the people who booked.
 
@@ -82,6 +83,9 @@ Yes. Define the values as constants in your `wp-config.php` and they will be use
 
 When a constant is set, the corresponding field on the settings page is shown as read-only.
 
+= Is the plugin available in my language? =
+The interface is translatable and weekday, month and time formats follow your WordPress site language automatically. Translations are contributed at https://translate.wordpress.org/projects/wp-plugins/dashboard-for-availio/ — contributions are very welcome.
+
 = Can I show only certain courts? =
 Yes, via the court filter in the settings (comma-separated court IDs).
 
@@ -91,6 +95,13 @@ Yes, via the court filter in the settings (comma-separated court IDs).
 2. Settings page with API access and display options.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: the plugin is now fully translatable. All interface texts are English originals and can be translated on translate.wordpress.org.
+* New: weekday and month names in the date picker follow the WordPress site language instead of being hard-coded.
+* New: the time of the last update follows the time format configured in WordPress.
+* Fix: the plugin header description was German; it is now English like the rest of the plugin.
+* Internal: removed unused week-view code; AJAX messages are inserted as text instead of markup.
 
 = 1.2.2 =
 * Tested with WordPress 7.2 and PHP 8.6.
@@ -120,6 +131,9 @@ Yes, via the court filter in the settings (comma-separated court IDs).
 * First public release.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+The interface is now translatable and follows your WordPress site language.
 
 = 1.2.2 =
 Compatibility update for WordPress 7.2 and PHP 8.6.

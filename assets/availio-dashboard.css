@@ -33,7 +33,7 @@
 
 }
 
-/* ── Fehler-Box ───────────────────────────────────────────────────────────── */
+/* ── Error box ────────────────────────────────────────────────────────────── */
 .availio-error,
 .availio-dashboard .availio-error {
     margin: 1em;
@@ -43,6 +43,13 @@
     border: 1px solid #d6a59b;
     color: #6b1f12;
     font-size: 0.95em;
+}
+
+/* ── Loading message ──────────────────────────────────────────────────────── */
+.availio-dashboard .availio-loading {
+    padding: 2em;
+    text-align: center;
+    color: #888;
 }
 
 /* ── Titel (Club-Name) ────────────────────────────────────────────────────── */

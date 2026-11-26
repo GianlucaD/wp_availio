@@ -1,6 +1,9 @@
 /**
  * availio-dashboard.js
- * Tab-Umschaltung (Heute / Datepicker) + AJAX-Laden pro Tag + Auto-Refresh.
+ * Tab switching (today / date picker) + per-day AJAX loading + auto-refresh.
+ *
+ * All human-readable text comes from availioDashConfig, which is localized
+ * server-side, so this file contains no translatable strings of its own.
  */
 (function () {
     'use strict';
@@ -12,12 +15,16 @@
     var todayYmd       = cfg.today          || isoDate(new Date());
     var maxYmd         = cfg.maxDate        || todayYmd;
     var refreshSeconds = cfg.refreshSeconds || 60;
+    var i18n           = cfg.i18n           || {};
 
-    var DAY_NAMES   = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-    var MONTH_NAMES = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-                       'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    var FALLBACK_DAYS   = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var FALLBACK_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    /* ── Datums-Hilfsfunktionen ────────────────────────────────────────────── */
+    var DAY_NAMES   = (cfg.dayNames   && cfg.dayNames.length   === 7)  ? cfg.dayNames   : FALLBACK_DAYS;
+    var MONTH_NAMES = (cfg.monthNames && cfg.monthNames.length === 12) ? cfg.monthNames : FALLBACK_MONTHS;
+
+    /* ── Date helpers ──────────────────────────────────────────────────────── */
 
     function isoDate(d) {
         return d.getFullYear()
@@ -43,14 +50,23 @@
 
     function cmp(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
 
-    /* ── Dashboard initialisieren ──────────────────────────────────────────── */
+    /* Replaces the panel content with a single message, as text (never markup). */
+    function showNotice(target, message, className) {
+        var box = document.createElement('div');
+        box.className = className;
+        box.textContent = message;
+        target.innerHTML = '';
+        target.appendChild(box);
+    }
+
+    /* ── Initialize the dashboard ──────────────────────────────────────────── */
 
     function initAll() {
         document.querySelectorAll('.availio-dashboard').forEach(init);
     }
 
     function init(dashboard) {
-        var heuteTab  = dashboard.querySelector('[data-target="availio-day"]');
+        var todayTab  = dashboard.querySelector('[data-target="availio-day"]');
         var dateTab   = dashboard.querySelector('[data-target="availio-date"]');
         var prevBtn   = dashboard.querySelector('#availio-prev-day');
         var nextBtn   = dashboard.querySelector('#availio-next-day');
@@ -58,14 +74,14 @@
 
         var currentDate = todayYmd;
 
-        /* Panels ein-/ausblenden */
+        /* Show / hide panels */
         function showPanel(id) {
             dashboard.querySelectorAll('.availio-panel').forEach(function (p) {
                 p.classList.toggle('availio-panel--hidden', p.id !== id);
             });
         }
 
-        /* Tab-Buttons aktivieren */
+        /* Activate tab buttons */
         function activateTab(btn) {
             dashboard.querySelectorAll('.availio-tab').forEach(function (t) {
                 t.classList.remove('active');
@@ -77,21 +93,20 @@
             }
         }
 
-        /* Pfeile aktualisieren */
+        /* Update the arrows */
         function refreshArrows() {
             if (prevBtn) prevBtn.disabled = cmp(currentDate, todayYmd) <= 0;
             if (nextBtn) nextBtn.disabled = cmp(currentDate, maxYmd)   >= 0;
         }
 
-        /* Tages-Daten via AJAX laden */
+        /* Load a day's data via AJAX */
         function loadDate(ymd) {
             currentDate = ymd;
             refreshArrows();
             if (dateTab) dateTab.textContent = formatLabel(ymd);
             if (!content) return;
 
-            content.innerHTML =
-                '<div style="padding:2em;text-align:center;color:#888;">Lade Daten…</div>';
+            showNotice(content, i18n.loading || 'Loading data…', 'availio-loading');
 
             var fd = new FormData();
             fd.append('action', 'availio_day');
@@ -104,36 +119,42 @@
                     if (data.success) {
                         content.innerHTML = data.data.html;
                     } else {
-                        content.innerHTML =
-                            '<div class="availio-error">Fehler: '
-                            + (data.data || 'Unbekannt') + '</div>';
+                        showNotice(
+                            content,
+                            (i18n.errorPrefix || 'Error:') + ' '
+                                + (data.data || i18n.unknownError || 'Unknown error'),
+                            'availio-error'
+                        );
                     }
                 })
                 .catch(function () {
-                    content.innerHTML =
-                        '<div class="availio-error">Verbindungsfehler.</div>';
+                    showNotice(
+                        content,
+                        i18n.connectionError || 'Connection error.',
+                        'availio-error'
+                    );
                 });
         }
 
-        /* Zum Datepicker-Panel wechseln */
+        /* Switch to the date-picker panel */
         function switchToDate() {
             activateTab(dateTab);
             showPanel('availio-date');
         }
 
-        /* Heute-Tab */
-        if (heuteTab) {
-            heuteTab.addEventListener('click', function () {
-                activateTab(heuteTab);
+        /* Today tab */
+        if (todayTab) {
+            todayTab.addEventListener('click', function () {
+                activateTab(todayTab);
                 showPanel('availio-day');
             });
         }
 
-        /* Datepicker-Tab (Klick auf die Label-Schaltfläche) */
+        /* Date-picker tab (click on the label button) */
         if (dateTab) {
             dateTab.addEventListener('click', function () {
                 switchToDate();
-                /* Beim ersten Öffnen: falls noch auf heute, AJAX für frische Daten */
+                /* On first open: if still on today, fetch fresh data via AJAX */
                 if (currentDate === todayYmd && content &&
                     !content.querySelector('.availio-day-grid')) {
                     loadDate(todayYmd);
@@ -141,7 +162,7 @@
             });
         }
 
-        /* Pfeil: zurück */
+        /* Arrow: backwards */
         if (prevBtn) {
             prevBtn.addEventListener('click', function () {
                 if (cmp(currentDate, todayYmd) > 0) {
@@ -151,7 +172,7 @@
             });
         }
 
-        /* Pfeil: vorwärts */
+        /* Arrow: forwards */
         if (nextBtn) {
             nextBtn.addEventListener('click', function () {
                 if (cmp(currentDate, maxYmd) < 0) {
@@ -163,8 +184,8 @@
 
         refreshArrows();
 
-        /* Auto-Refresh: Seite neu laden wenn «Heute» aktiv,
-           sonst nur den aktuellen Tag per AJAX aktualisieren */
+        /* Auto-refresh: reload the page while the today tab is active,
+           otherwise refresh only the selected day via AJAX */
         function scheduleRefresh() {
             setTimeout(function () {
                 var datePanel = dashboard.querySelector('#availio-date');
@@ -172,11 +193,11 @@
                     !datePanel.classList.contains('availio-panel--hidden');
 
                 if (dateActive) {
-                    // Datepicker aktiv → nur diesen Tag neu laden, dann neu planen
+                    // Date picker active -> reload just this day, then reschedule
                     loadDate(currentDate);
                     scheduleRefresh();
                 } else {
-                    // Heute-Tab aktiv → normaler Seiten-Reload
+                    // Today tab active -> plain page reload
                     location.reload();
                 }
             }, refreshSeconds * 1000);
